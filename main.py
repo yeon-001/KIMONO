@@ -87,45 +87,47 @@ data = [
 df = pd.DataFrame(data)
 
 
-# 내림차순 가로 막대그래프 생성 함수
 def draw_sorted_bar_chart(sub_df, bar_color):
-    chart = (
-        alt.Chart(sub_df)
-        .mark_bar(color=bar_color)
-        .encode(
-            x=alt.X("득표수:Q", title="득표수 (표)"),
-            y=alt.Y(
-                "항목:N", sort="-x", title=None
-            ),  # sort='-x'로 득표수 기준 내림차순 정렬
-            tooltip=["순위", "항목", "득표수"],
-        )
-        .properties(height=max(350, len(sub_df) * 24))
+    max_val = sub_df["득표수"].max()
+
+    base = alt.Chart(sub_df).encode(
+        x=alt.X(
+            "득표수:Q",
+            title="득표수 (표)",
+            scale=alt.Scale(domain=[0, max_val * 1.15]),  # 숫자 공간 확보
+        ),
+        y=alt.Y("항목:N", sort="-x", title=None),
+        tooltip=["순위", "항목", "득표수"],
     )
-    return chart
+
+    bars = base.mark_bar(color=bar_color)
+
+    # 막대 끝에 숫자 표시
+    text = base.mark_text(
+        align="left",
+        baseline="middle",
+        dx=5,  # 막대 끝에서 오른쪽으로 5px 여백
+    ).encode(text="득표수:Q")
+
+    return (bars + text).properties(height=max(350, len(sub_df) * 24))
 
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🌸 좋아하는 기모노 무늬")
-    df_pattern = (
-        df[df["구분"] == "무늬"]
-        .drop(columns=["구분"])
-        .sort_values(by="득표수", ascending=False)
+    df_pattern = df[df["구분"] == "무늬"].sort_values(
+        by="득표수", ascending=False
     )
     st.altair_chart(
         draw_sorted_bar_chart(df_pattern, "#FF6B6B"), use_container_width=True
     )
-    st.dataframe(df_pattern, use_container_width=True, hide_index=True)
 
 with col2:
     st.subheader("🎨 좋아하는 기모노 색상")
-    df_color = (
-        df[df["구분"] == "색상"]
-        .drop(columns=["구분"])
-        .sort_values(by="득표수", ascending=False)
+    df_color = df[df["구분"] == "색상"].sort_values(
+        by="득표수", ascending=False
     )
     st.altair_chart(
         draw_sorted_bar_chart(df_color, "#4D96FF"), use_container_width=True
     )
-    st.dataframe(df_color, use_container_width=True, hide_index=True)
