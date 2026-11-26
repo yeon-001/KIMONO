@@ -1,106 +1,101 @@
-
-import streamlit as st
 import pandas as pd
-import plotly.express as px
+import streamlit as st
 
-# 페이지 설정
-st.set_page_config(
-    page_title="기모노 무늬와 색상 분석",
-    page_icon="🎎",
-    layout="wide"
+st.set_page_config(page_title="기모노 무늬 & 색상 설문 결과", layout="wide")
+
+st.title("👘 기모노 좋아하는 무늬 & 색상 순위")
+st.caption(
+    "출처: TripFarm 주식회사 '리카와후쿠(梨花和服)' 설문조사 (20~60대 남녀 100명, 복수 응답)"
 )
 
-# 제목
-st.title("🎎 기모노 무늬와 색상 분석")
-st.write("기모노의 무늬와 색상별 득표수를 비교해 보는 그래프입니다.")
+data = [
+    # 무늬 순위
+    {"구분": "무늬", "순위": "1위", "항목": "무지 (민무늬)", "득표수": 32},
+    {"구분": "무늬", "순위": "2위", "항목": "벚꽃 무늬 (桜文)", "득표수": 28},
+    {"구분": "무늬", "순위": "3위", "항목": "동백꽃 무늬 (椿)", "득표수": 23},
+    {"구분": "무늬", "순위": "4위", "항목": "모란 무늬 (牡丹)", "득표수": 22},
+    {"구분": "무늬", "순위": "5위", "항목": "나비 무늬 (蝶)", "득표수": 12},
+    {"구분": "무늬", "순위": "6위", "항목": "창포 (菖蒲)", "득표수": 9},
+    {"구분": "무늬", "순위": "7위", "항목": "봉황 (鳳凰)", "득표수": 8},
+    {"구분": "무늬", "순위": "7위", "항목": "송죽매 (松竹梅)", "득표수": 8},
+    {"구분": "무늬", "순위": "7위", "항목": "부채 (扇)", "득표수": 8},
+    {"구분": "무늬", "순위": "10위", "항목": "학 (鶴)", "득표수": 7},
+    {"구분": "무늬", "순위": "10위", "항목": "스트라이프", "득표수": 7},
+    {"구분": "무늬", "순위": "12위", "항목": "눈 (雪)", "득표수": 5},
+    {
+        "구분": "무늬",
+        "순위": "13위",
+        "항목": "체크무늬 (市松文様)",
+        "득표수": 4,
+    },
+    {"구분": "무늬", "순위": "14위", "항목": "청해파 (青海波)", "득표수": 3},
+    {
+        "구분": "무늬",
+        "순위": "14위",
+        "항목": "야가스리/화살깃 무늬 (矢絣)",
+        "득표수": 3,
+    },
+    {
+        "구분": "무늬",
+        "순위": "14위",
+        "항목": "삼잎 무늬 (麻の葉)",
+        "득표수": 3,
+    },
+    {"구분": "무늬", "순위": "14위", "항목": "토끼 (ウサギ)", "득표수": 3},
+    {"구분": "무늬", "순위": "14위", "항목": "칠보문 (七宝文)", "득표수": 3},
+    {
+        "구분": "무늬",
+        "순위": "19위",
+        "항목": "귀갑문/거북등 무늬 (亀甲文)",
+        "득표수": 2,
+    },
+    {"구분": "무늬", "순위": "19위", "항목": "체크", "득표수": 2},
+    {"구분": "무늬", "순위": "21위", "항목": "도트 (물방울)", "득표수": 1},
+    {
+        "구분": "무늬",
+        "순위": "21위",
+        "항목": "다테와쿠문 (立涌文)",
+        "득표수": 1,
+    },
+    {
+        "구분": "무늬",
+        "순위": "-",
+        "항목": "기타 (고전무늬, 에도코몬 등)",
+        "득표수": 3,
+    },
+    # 색상 순위
+    {"구분": "색상", "순위": "1위", "항목": "남색 (紺)", "득표수": 41},
+    {"구분": "색상", "순위": "2위", "항목": "검정색 (黒)", "득표수": 24},
+    {"구분": "색상", "순위": "3위", "항목": "보라색 (紫)", "득표수": 22},
+    {"구분": "색상", "순위": "4위", "항목": "분홍색 (ピンク)", "득표수": 21},
+    {"구분": "색상", "순위": "5위", "항목": "하늘색 (水色)", "득표수": 19},
+    {"구분": "색상", "순위": "6위", "항목": "파랑 (青)", "득표수": 16},
+    {"구분": "색상", "순위": "7위", "항목": "빨강 (赤)", "득표수": 15},
+    {"구분": "색상", "순위": "8위", "항목": "흰색 (白)", "득표수": 7},
+    {"구분": "색상", "순위": "8위", "항목": "초록 (緑)", "득표수": 7},
+    {"구분": "색상", "순위": "10위", "항목": "주황 (オレンジ)", "득표수": 6},
+    {"구분": "색상", "순위": "11위", "항목": "노랑 (黄色)", "득표수": 2},
+    {
+        "구분": "색상",
+        "순위": "-",
+        "항목": "기타 (베이지, 그라데이션 등)",
+        "득표수": 3,
+    },
+]
 
-# 데이터 불러오기
-@st.cache_data
-def load_data():
-    df = pd.read_csv(
-        "kimono_pattern_color_ranking.csv",
-        encoding="utf-8"
-    )
-    return df
+df = pd.DataFrame(data)
 
-df = load_data()
+# 화면을 두 개의 열로 분할
+col1, col2 = st.columns(2)
 
-# 무늬와 색상 데이터 분리
-pattern_df = df[df["구분"] == "무늬"].copy()
-color_df = df[df["구분"] == "색상"].copy()
+with col1:
+    st.subheader("🌸 좋아하는 기모노 무늬")
+    df_pattern = df[df["구분"] == "무늬"].drop(columns=["구분"])
+    st.bar_chart(df_pattern.set_index("항목")["득표수"])
+    st.dataframe(df_pattern, use_container_width=True, hide_index=True)
 
-# 득표수 기준 내림차순 정렬
-pattern_df = pattern_df.sort_values(
-    "득표수", ascending=False
-)
-
-color_df = color_df.sort_values(
-    "득표수", ascending=False
-)
-
-# 그래프 생성 함수
-def draw_chart(data, title):
-
-    fig = px.bar(
-        data,
-        x="항목",
-        y="득표수",
-        text="득표수",
-        title=title
-    )
-
-    fig.update_traces(
-        textposition="outside",
-        cliponaxis=False
-    )
-
-    fig.update_layout(
-        xaxis_title="무늬 이름 / 색상 이름",
-        yaxis_title="득표수",
-        xaxis={
-            "categoryorder": "total descending",
-            "tickangle": -45
-        },
-        yaxis={
-            "rangemode": "tozero"
-        },
-        height=600,
-        showlegend=False
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
-
-
-# 무늬 그래프
-st.subheader("① 무늬별 득표수")
-draw_chart(pattern_df, "기모노 무늬별 득표수")
-
-st.divider()
-
-# 색상 그래프
-st.subheader("② 색상별 득표수")
-draw_chart(color_df, "기모노 색상별 득표수")
-
-st.divider()
-
-# 데이터 표
-st.subheader("📊 원본 데이터")
-
-tab1, tab2 = st.tabs(["무늬 데이터", "색상 데이터"])
-
-with tab1:
-    st.dataframe(
-        pattern_df,
-        use_container_width=True,
-        hide_index=True
-    )
-
-with tab2:
-    st.dataframe(
-        color_df,
-        use_container_width=True,
-        hide_index=True
-    )
+with col2:
+    st.subheader("🎨 좋아하는 기모노 색상")
+    df_color = df[df["구분"] == "색상"].drop(columns=["구분"])
+    st.bar_chart(df_color.set_index("항목")["득표수"])
+    st.dataframe(df_color, use_container_width=True, hide_index=True)
